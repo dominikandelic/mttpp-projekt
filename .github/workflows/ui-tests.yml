@@ -11,16 +11,49 @@ on:
 jobs:
   selenium-tests:
     runs-on: ubuntu-latest
+    env:
+      SELENIUM_IMAGE_TAG: 4.43.0-20260404
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chrome
+            image: selenium/standalone-chrome
+            suite: testng-chrome.xml
+          - browser: firefox
+            image: selenium/standalone-firefox
+            suite: testng-firefox.xml
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: temurin
           cache: maven
 
-      - name: Run cross-browser TestNG suite
-        run: mvn test
+      - name: Start Selenium ${{ matrix.browser }} container
+        run: |
+          docker run -d \
+            --name selenium-${{ matrix.browser }} \
+            --platform linux/amd64 \
+            -p 4444:4444 \
+            --shm-size=2g \
+            ${{ matrix.image }}:${{ env.SELENIUM_IMAGE_TAG }}
+
+      - name: Wait for Selenium Grid
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:4444/status | grep -q '"ready"[[:space:]]*:[[:space:]]*true'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs selenium-${{ matrix.browser }}
+          exit 1
+
+      - name: Run ${{ matrix.browser }} TestNG suite
+        run: mvn test -DsuiteXmlFile=${{ matrix.suite }} -DremoteUrl=http://localhost:4444/wd/hub

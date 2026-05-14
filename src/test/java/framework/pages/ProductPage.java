@@ -3,8 +3,6 @@ package framework.pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import java.net.URI;
-
 public class ProductPage extends BasePage {
 
     private final By productName = byDataTest("product-name");
@@ -52,13 +50,16 @@ public class ProductPage extends BasePage {
     }
 
     public ProductPage addToCart() {
+        String expectedCartQuantity = quantity();
         javascriptClick(addToCartButton);
-        wait.until(driver -> !driver.findElements(cartLink).isEmpty());
+        wait.until(driver -> driver.findElements(cartLink).stream()
+                .anyMatch(element -> element.getText().contains(expectedCartQuantity)));
         return this;
     }
 
     public CartPage openCart() {
-        driver.get(URI.create(driver.getCurrentUrl()).resolve("/checkout").toString());
+        click(cartLink);
+        waitForAngularPage();
         return new CartPage(driver);
     }
 }
