@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Practice Software Testing Cross Browser Suite" parallel="none">
+    <test name="Toolshop UI regression tests - Chrome">
+        <parameter name="browser" value="chrome"/>
+        <classes>
+            <class name="framework.tests.ProductCatalogueTests"/>
+            <class name="framework.tests.CartTests"/>
+            <class name="framework.tests.LoginTests"/>
+        </classes>
+    </test>
+
+    <test name="Toolshop UI regression tests - Firefox">
+        <parameter name="browser" value="firefox"/>
+        <classes>
+            <class name="framework.tests.ProductCatalogueTests"/>
+            <class name="framework.tests.CartTests"/>
+            <class name="framework.tests.LoginTests"/>
+        </classes>
+    </test>
+</suite>
