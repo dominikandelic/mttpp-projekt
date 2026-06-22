@@ -2,7 +2,6 @@ package framework.tests;
 
 import framework.config.TestConfig;
 import framework.driver.DriverFactory;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -18,7 +17,7 @@ public abstract class BaseTest {
     public void setUp(@Optional("") String browser) {
         String selectedBrowser = browser == null || browser.isBlank() ? TestConfig.browser() : browser;
         driver = DriverFactory.createDriver(selectedBrowser);
-        clearBrowserStorage();
+        driver.manage().deleteAllCookies();
     }
 
     @AfterMethod(alwaysRun = true)
@@ -28,9 +27,4 @@ public abstract class BaseTest {
         }
     }
 
-    private void clearBrowserStorage() {
-        driver.get(TestConfig.BASE_URL);
-        ((JavascriptExecutor) driver).executeScript("window.localStorage.clear(); window.sessionStorage.clear();");
-        driver.manage().deleteAllCookies();
-    }
 }

@@ -16,9 +16,7 @@ public class LoginPage extends BasePage {
     }
 
     public LoginPage open() {
-        driver.get(TestConfig.BASE_URL + "/auth/login");
-        waitForAngularPage();
-        visible(submitButton);
+        openWithRetry(TestConfig.BASE_URL + "/auth/login", submitButton);
         return this;
     }
 

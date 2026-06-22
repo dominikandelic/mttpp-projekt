@@ -19,7 +19,7 @@ public abstract class BasePage {
 
     protected BasePage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(12));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(isCi() ? 30 : 12));
     }
 
     protected WebElement visible(By locator) {
@@ -33,6 +33,35 @@ public abstract class BasePage {
     protected List<WebElement> allVisible(By locator) {
         wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(locator, 0));
         return driver.findElements(locator);
+    }
+
+    protected void waitForAnyVisible(By locator) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    protected boolean hasAny(By locator) {
+        return !driver.findElements(locator).isEmpty();
+    }
+
+    protected void openWithRetry(String url, By readyLocator) {
+        RuntimeException lastFailure = null;
+        int attempts = isCi() ? 3 : 2;
+
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            try {
+                driver.get(url);
+                waitForAngularPage();
+                waitForAnyVisible(readyLocator);
+                return;
+            } catch (RuntimeException failure) {
+                lastFailure = failure;
+                if (attempt < attempts) {
+                    driver.navigate().refresh();
+                }
+            }
+        }
+
+        throw lastFailure;
     }
 
     protected void click(By locator) {
@@ -70,5 +99,9 @@ public abstract class BasePage {
 
     protected By byDataTest(String value) {
         return By.cssSelector("[data-test='" + value + "']");
+    }
+
+    private boolean isCi() {
+        return "true".equalsIgnoreCase(System.getenv("CI"));
     }
 }

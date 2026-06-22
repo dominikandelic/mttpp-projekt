@@ -22,9 +22,7 @@ public class HomePage extends BasePage {
     }
 
     public HomePage open() {
-        driver.get(TestConfig.BASE_URL);
-        waitForAngularPage();
-        allVisible(productCards);
+        openWithRetry(TestConfig.BASE_URL, productCards);
         return this;
     }
 

@@ -25,7 +25,9 @@ Practice Software Testing was selected because it provides realistic e-commerce-
 - Maven
 - Selenium WebDriver
 - TestNG
-- WebDriverManager
+- WebDriverManager for local browser driver setup
+- RemoteWebDriver
+- Official Selenium standalone Docker containers for CI browser execution
 - Page Object Model
 - Explicit waits
 - Cross-browser support for Chrome and Firefox with parallel browser execution
@@ -72,7 +74,23 @@ Run the same suite in parallel:
 mvn test -DsuiteXmlFile=testng-parallel.xml
 ```
 
-To run only one browser, update the `browser` parameter in `testng.xml` or temporarily remove one of the browser-specific `<test>` blocks.
+Run only Chrome:
+
+```bash
+mvn test -DsuiteXmlFile=testng-chrome.xml
+```
+
+Run only Firefox:
+
+```bash
+mvn test -DsuiteXmlFile=testng-firefox.xml
+```
+
+Run against a remote Selenium Grid or standalone Selenium Docker container:
+
+```bash
+mvn test -DsuiteXmlFile=testng-chrome.xml -DremoteUrl=http://localhost:4444/wd/hub
+```
 
 The base URL is intentionally fixed in the framework because the page objects and test data are written specifically for Practice Software Testing.
 
@@ -92,8 +110,10 @@ mvn surefire-report:report
 
 ## CI
 
-The repository includes a GitHub Actions workflow in `.github/workflows/ui-tests.yml`. 
+The repository includes a GitHub Actions workflow in `.github/workflows/ui-tests.yml`.
 
 It runs the Maven test suite on every push to main branch and every pull request targeting main branch.
 
-Local test runs open visible browser windows. In GitHub Actions, the default `CI=true` environment variable is detected and the same tests run in headless Chrome and headless Firefox because virtual displays are more heavy on the ubuntu machine which the agent runs on.
+In GitHub Actions, Chrome and Firefox run in official Selenium standalone Docker containers. The Java tests connect to those containers through `RemoteWebDriver`, which means CI does not depend on WebDriverManager or browsers installed directly on the GitHub runner.
+
+Headless execution is available for manual runs by setting the `HEADLESS=true` environment variable.

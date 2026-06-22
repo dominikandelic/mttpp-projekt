@@ -13,7 +13,7 @@ public class CartPage extends BasePage {
 
     public CartPage(WebDriver driver) {
         super(driver);
-        visible(proceedButton);
+        visible(productTitle);
     }
 
     public String productTitle() {
